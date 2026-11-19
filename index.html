@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eid Salami BD - Track Eid Salami Given &amp; Received</title>
+<meta name="description" content="Offline bilingual Eid salami tracker for Bangladesh: record salami given and received, watch totals, giving budgets and per-person summaries.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1 id="appTitle" data-i18n="appTitle">Eid Salami BD</h1>
+    <p class="sub" data-i18n="appSub">Track Eid salami given and received - in taka, in your browser.</p>
+  </div>
+  <button id="langBtn" class="btn" type="button">Bangla</button>
+</header>
+
+<p id="msg" class="msg" hidden></p>
+<p id="sampleBadge" class="badge" data-i18n="sampleBadge" hidden>Sample data - replace with your own records</p>
+
+<nav class="tabs" role="tablist">
+  <button class="tab active" data-tab="dash" data-i18n="tabDash" type="button">Dashboard</button>
+  <button class="tab" data-tab="records" data-i18n="tabRecords" type="button">Records</button>
+  <button class="tab" data-tab="people" data-i18n="tabPeople" type="button">People</button>
+  <button class="tab" data-tab="budget" data-i18n="tabBudget" type="button">Budget</button>
+  <button class="tab" data-tab="data" data-i18n="tabData" type="button">Data</button>
+</nav>
+
+<main>
+  <section id="panel-dash" class="panel">
+    <div class="grid">
+      <div class="card"><div class="label" data-i18n="statReceived">Total received</div><div class="big" id="statReceived">-</div><div class="sub2" id="statReceivedCount"></div></div>
+      <div class="card"><div class="label" data-i18n="statGiven">Total given</div><div class="big" id="statGiven">-</div><div class="sub2" id="statGivenCount"></div></div>
+      <div class="card"><div class="label" data-i18n="statNet">Net balance</div><div class="big" id="statNet">-</div></div>
+      <div class="card"><div class="label" data-i18n="statCount">Records</div><div class="big" id="statCount">-</div></div>
+      <div class="card"><div class="label" data-i18n="statBiggest">Biggest salami</div><div class="big small" id="statBiggest">-</div></div>
+      <div class="card"><div class="label" data-i18n="statAvg">Average per record</div><div class="big" id="statAvg">-</div></div>
+    </div>
+    <p id="dashEmpty" class="empty" data-i18n="noData" hidden>No salami records yet.</p>
+    <h2 data-i18n="byEidTitle">By Eid</h2>
+    <ul class="records" id="byEidList"></ul>
+  </section>
+
+  <section id="panel-records" class="panel" hidden>
+    <h2 data-i18n="recordsTitle">Add salami record</h2>
+    <form id="recForm" novalidate>
+      <label><span data-i18n="fName">Person name</span>
+        <input id="fName" type="text" maxlength="60" required data-i18n-ph="fNamePh" placeholder="e.g. Amma">
+      </label>
+      <div class="formrow">
+        <label><span data-i18n="fRelation">Relation</span>
+          <select id="fRelation" required></select>
+        </label>
+        <label><span data-i18n="fDirection">Direction</span>
+          <select id="fDirection" required>
+            <option value="received" data-i18n="dirReceived">Received</option>
+            <option value="given" data-i18n="dirGiven">Given</option>
+          </select>
+        </label>
+      </div>
+      <div class="formrow">
+        <label><span data-i18n="fAmount">Amount</span>
+          <input id="fAmount" type="number" min="1" max="100000" step="1" inputmode="numeric" required>
+        </label>
+        <label><span data-i18n="fEid">Eid</span>
+          <select id="fEid" required>
+            <option value="fitr" data-i18n="eidFitr">Eid-ul-Fitr</option>
+            <option value="adha" data-i18n="eidAdha">Eid-ul-Adha</option>
+          </select>
+        </label>
+        <label><span data-i18n="fYear">Year</span>
+          <input id="fYear" type="number" min="2000" max="2100" step="1" inputmode="numeric" required>
+        </label>
+        <label><span data-i18n="fDate">Date</span>
+          <input id="fDate" type="date" required>
+        </label>
+      </div>
+      <label><span data-i18n="fNote">Note (optional)</span>
+        <input id="fNote" type="text" maxlength="120" data-i18n-ph="fNotePh" placeholder="e.g. first salami from Nanu">
+      </label>
+      <p id="formErr" class="err" role="alert"></p>
+      <div class="row">
+        <button id="submitBtn" class="btn primary" type="submit" data-i18n="btnAdd">Add record</button>
+        <button id="cancelEdit" class="btn" type="button" data-i18n="btnCancel" hidden>Cancel</button>
+      </div>
+    </form>
+
+    <h2 data-i18n="filterTitle">Filter records</h2>
+    <div class="filters">
+      <label><span data-i18n="filterEid">Eid</span>
+        <select id="fltEid">
+          <option value="all" data-i18n="filterAll">All</option>
+          <option value="fitr" data-i18n="eidFitr">Eid-ul-Fitr</option>
+          <option value="adha" data-i18n="eidAdha">Eid-ul-Adha</option>
+        </select>
+      </label>
+      <label><span data-i18n="filterDirection">Direction</span>
+        <select id="fltDirection">
+          <option value="all" data-i18n="filterAll">All</option>
+          <option value="received" data-i18n="dirReceived">Received</option>
+          <option value="given" data-i18n="dirGiven">Given</option>
+        </select>
+      </label>
+      <label><span data-i18n="filterRelation">Relation</span>
+        <select id="fltRelation"></select>
+      </label>
+      <label><span data-i18n="filterSearch">Search name</span>
+        <input id="fltSearch" type="search" data-i18n-ph="filterSearchPh" placeholder="Type a name...">
+      </label>
+    </div>
+    <p id="filterCount" class="hint"></p>
+    <p id="recEmpty" class="empty" data-i18n="noData" hidden>No salami records yet.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr>
+          <th data-i18n="colPerson">Person</th><th data-i18n="colRelation">Relation</th>
+          <th data-i18n="colDirection">Direction</th><th data-i18n="colAmount">Amount</th>
+          <th data-i18n="colEid">Eid</th><th data-i18n="colDate">Date</th>
+          <th data-i18n="colNote">Note</th><th data-i18n="colActions">Actions</th>
+        </tr></thead>
+        <tbody id="recBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="panel-people" class="panel" hidden>
+    <h2 data-i18n="peopleTitle">Per-person summary</h2>
+    <p id="peopleEmpty" class="empty" data-i18n="peopleEmpty" hidden>No people yet - add a record first.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr>
+          <th data-i18n="colPerson">Person</th><th data-i18n="colReceived">Received</th>
+          <th data-i18n="colGiven">Given</th><th data-i18n="colNet">Net</th>
+          <th data-i18n="colCount">Records</th>
+        </tr></thead>
+        <tbody id="peopleBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="panel-budget" class="panel" hidden>
+    <h2 data-i18n="budgetTitle">Giving budget</h2>
+    <p class="hint" data-i18n="budgetHint">Set how much you plan to give this Eid. Progress counts your Given records for that Eid.</p>
+    <form id="budgetForm" class="target">
+      <label><span data-i18n="budgetEid">Eid</span>
+        <select id="bEid">
+          <option value="fitr" data-i18n="eidFitr">Eid-ul-Fitr</option>
+          <option value="adha" data-i18n="eidAdha">Eid-ul-Adha</option>
+        </select>
+      </label>
+      <label><span data-i18n="budgetYear">Year</span>
+        <input id="bYear" type="number" min="2000" max="2100" step="1" inputmode="numeric" required>
+      </label>
+      <label><span data-i18n="budgetLabel">Budget</span>
+        <input id="bAmount" type="number" min="0" max="10000000" step="1" inputmode="numeric" placeholder="0">
+      </label>
+      <button class="btn primary" type="submit" data-i18n="btnSaveBudget">Save budget</button>
+    </form>
+    <p id="budgetErr" class="err" role="alert"></p>
+    <div class="progress"><div id="budgetBar"></div></div>
+    <p id="budgetPct" class="hint"></p>
+    <ul class="records">
+      <li><span data-i18n="budgetSpent">Spent</span><strong id="budgetSpent">-</strong></li>
+      <li><span data-i18n="budgetRemaining">Remaining</span><strong id="budgetRemaining">-</strong></li>
+    </ul>
+    <p id="budgetOver" class="err" hidden></p>
+  </section>
+
+  <section id="panel-data" class="panel" hidden>
+    <h2 data-i18n="dataTitle">Your data</h2>
+    <div class="row wrap">
+      <button id="exportBtn" class="btn" type="button" data-i18n="btnExport">Export JSON</button>
+      <label class="btn filebtn"><span data-i18n="btnImport">Import JSON</span>
+        <input id="importFile" type="file" accept="application/json,.json" hidden>
+      </label>
+      <button id="sampleBtn" class="btn" type="button" data-i18n="btnSample">Load sample data</button>
+    </div>
+    <h2 data-i18n="btnClear">Clear all data</h2>
+    <p class="hint" data-i18n="confirmClear">Type DELETE to erase all records and budgets. This cannot be undone.</p>
+    <div class="row wrap">
+      <input id="clearInput" type="text" data-i18n-ph="clearTypePh" placeholder="Type DELETE" autocomplete="off">
+      <button id="clearBtn" class="btn danger" type="button" data-i18n="clearConfirm" disabled>Erase everything</button>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p data-i18n="footerNote">Your records stay in this browser (localStorage). Amounts are yours - this app does not send or verify money anywhere.</p>
+</footer>
+
+<script src="js/i18n.js"></script>
+<script src="js/data.js"></script>
+<script src="js/logic.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

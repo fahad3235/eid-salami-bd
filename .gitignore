@@ -1,0 +1,6 @@
+# eid-salami-bd - nothing to build, but keep secrets and local state out
+.DS_Store
+Thumbs.db
+*.log
+*.local
+node_modules/
